@@ -133,23 +133,30 @@ int main(int argc, char const *argv[]) {
 
     // initialize the memory
     uint32_t memory_size = t.size()*t.page_size;
-    uint8_t memory[memory_size];
-    memset(memory, '\0', memory_size);
+    uint8_t memory0[memory_size];
+    uint8_t memory1[memory_size];
+    memset(memory0, 0, memory_size);
+    memset(memory1, 1, memory_size);
     // fill according to elf segments
     for (const auto & s : elf.segments) {
         uint32_t physical_address = t.physical_address(s->get_virtual_address());
-        memcpy(memory+physical_address, s->get_data(), s->get_file_size());
+        memcpy(memory0+physical_address, s->get_data(), s->get_file_size());
+        memset(memory1+physical_address, 0, s->get_memory_size());
+        memcpy(memory1+physical_address, s->get_data(), s->get_file_size());
     }
     // set entry point and fill reset routine
     SET_ENTRY(elf.get_entry());
-    memcpy(memory+t.physical_address(RESET_VECTOR), reset_routine, sizeof(reset_routine));
+    memcpy(memory0+t.physical_address(RESET_VECTOR), reset_routine, sizeof(reset_routine));
+    memcpy(memory1+t.physical_address(RESET_VECTOR), reset_routine, sizeof(reset_routine));
     // export
     std::ofstream memory_ofs( "memory.mem" );
     for (uint32_t i = 0; i < memory_size; i+=4) {
-        memory_ofs << setfill('0') << setw(2) << hex << +memory[i+0];
-        memory_ofs << setfill('0') << setw(2) << hex << +memory[i+1];
-        memory_ofs << setfill('0') << setw(2) << hex << +memory[i+2];
-        memory_ofs << setfill('0') << setw(2) << hex << +memory[i+3];
+        for (uint8_t j = 0; j < 4; j++) {
+            if (memory0[i+j] == memory1[i+j])
+                memory_ofs << setfill('0') << setw(2) << hex << +memory0[i+j];
+            else
+                memory_ofs << "xx";
+        }
         memory_ofs << (((i+4)%16) ? ' ' : '\n');
     }
     memory_ofs.close();

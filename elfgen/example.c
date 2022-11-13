@@ -2,6 +2,7 @@
 #define SIZE 0x100
 
 const int const_array[SIZE] = { 0xdeadbeef };
+int zero_array[SIZE] = { 0 };
 int out[SIZE];
 
 void __start(void) {

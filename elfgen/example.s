@@ -41,6 +41,13 @@ $L3:
 	.size	__start, .-__start
 
 	.comm	out,1024,4
+	.globl	zero_array
+	.section	.bss,"aw",@nobits
+	.align	2
+	.type	zero_array, @object
+	.size	zero_array, 1024
+zero_array:
+	.space	1024
 	.globl	const_array
 	.rdata
 	.align	2
