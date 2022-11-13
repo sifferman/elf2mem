@@ -15,7 +15,7 @@ using namespace std;
 
 // specific to MIPS
 #define RESET_VECTOR    ((uint32_t)0xbfc00000)
-#define STACK_START     (((uint32_t)0x8000000)-STACK_SIZE)
+#define STACK_START     ((uint32_t)0x80000000-STACK_SIZE)
 
 
 uint8_t reset_routine[] = {
